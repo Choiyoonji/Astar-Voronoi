@@ -8,17 +8,15 @@ class Voronoi_Diagram:
     def __init__(self, global_path = None):
         self.global_path = global_path
         self.voronoi_lines = Voronoi(self.global_path)
+        
+        delnum = 0
+        for i in range(0,len(self.voronoi_lines.ridge_points)):
+            if 1 >= self.voronoi_lines.ridge_points[i][0]-self.voronoi_lines.ridge_points[i][1] >= -1:
+                self.voronoi_lines.ridge_vertices.pop(i-delnum)
+                delnum += 1
+        
         #plt.plot(self.global_path)
         #plt.show()
-        
-    def ccw(self,x1,x2,x3,y1,y2,y3):
-        cross_product = (x2 - x1)*(y3 - y1) - (x3 - x1)*(y2 - y1)
-        if cross_product > 0:
-            return 1
-        elif cross_product < 0:
-            return -1
-        else:
-            return 0
         
     def show(self):
         fig = voronoi_plot_2d(self.voronoi_lines, show_vertices=True, line_colors='orange',

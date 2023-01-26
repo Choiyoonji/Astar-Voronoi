@@ -123,7 +123,7 @@ class Astar:
         
         while True:
             path.append([self.curNode.x,self.curNode.y])
-            if self.curNode.x == self.xy_goal[0] and self.curNode.y == self.xy_goal[1]:
+            if self.curNode.x == self.xy_start[0] and self.curNode.y == self.xy_start[1]:
                 break
             
             self.curNode = self.curNode.pnode
