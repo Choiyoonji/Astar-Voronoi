@@ -1,6 +1,7 @@
 from math import sin, cos
 import numpy as np
 from scipy.spatial import distance
+import Voronoi
 
 MAX_theta = 20
 MIN_theta = -20

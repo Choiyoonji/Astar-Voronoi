@@ -1,28 +1,59 @@
 import numpy as np
-from scipy.spatial import Voronoi, voronoi_plot_2d
+from scipy.spatial import Voronoi, voronoi_plot_2d, distance
 import matplotlib.pyplot as plt
+from collections import deque
 # import random
 # import time
 
 class Voronoi_Diagram:
-    def __init__(self, global_path = None):
-        self.global_path = global_path
-        self.voronoi_lines = Voronoi(self.global_path)
+    def __init__(self, x, y, line_left = None, line_right = None, obs_xy = None):
+        self.x = x
+        self.y = y
         
+        self.obs = line_left + line_right + obs_xy
+        self.voronoi = Voronoi(self.obs)
+        
+        
+        # 필요없는 선들 제거
         delnum = 0
-        for i in range(0,len(self.voronoi_lines.ridge_points)):
-            if 1 >= self.voronoi_lines.ridge_points[i][0]-self.voronoi_lines.ridge_points[i][1] >= -1:
-                self.voronoi_lines.ridge_vertices.pop(i-delnum)
+        for i in range(len(self.voronoi.ridge_points)):
+            if -1 <= self.voronoi.ridge_points[i][0] - self.voronoi.ridge_points[i][1] <= 1:
+                self.voronoi.ridge_vertices.pop(i-delnum)
                 delnum += 1
+                
+        # self.global_path = global_path
+        # self.voronoi_lines = Voronoi(self.global_path)
         
-        #plt.plot(self.global_path)
-        #plt.show()
+        # delnum = 0
+        # for i in range(0,len(self.voronoi_lines.ridge_points)):
+        #     if 1 >= self.voronoi_lines.ridge_points[i][0]-self.voronoi_lines.ridge_points[i][1] >= -1:
+        #         self.voronoi_lines.ridge_vertices.pop(i-delnum)
+        #         delnum += 1
+        
+        # plt.plot(self.global_path)
+        # plt.show()
+        
+    def find_start(self):
+        dis = [distance.euclidean([self.x,self.y],p) for p in self.voronoi.vertices]
+        min_ind = dis.index(min(dis))
+
+        return min_ind
+    
+    def get_path(self):
+        start_point = self.find_start()
+        deq = deque([])
+        while True:
+            pass
         
     def show(self):
         fig = voronoi_plot_2d(self.voronoi_lines, show_vertices=True, line_colors='orange',
                       line_width=1, line_alpha=0.6, point_size=1)
         plt.show()
- 
+    
+    
+        
+
+"""
 def main():
     point = np.array([(4, 478) ,
     (18, 469) ,
@@ -203,3 +234,4 @@ def main():
     
 if __name__ == '__main__':
     main()
+"""
