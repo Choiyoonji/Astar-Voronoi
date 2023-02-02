@@ -5,33 +5,48 @@ from collections import deque
 # import random
 # import time
 
+MACARON_TREAD = 3
+
 class Voronoi_Diagram:
-    def __init__(self, x, y, line_left = None, line_right = None, obs_xy = None):
-        self.x = x
-        self.y = y
+    def __init__(self, global_path, line_left = None, line_right = None, obs_xy = None):
+        # self.x = x
+        # self.y = y
         
-        self.obs = line_left + line_right + obs_xy
-        self.voronoi = Voronoi(self.obs)
+        # self.obs = line_left + line_right + obs_xy
+        # self.voronoi = Voronoi(self.obs)
         
         
-        # 필요없는 선들 제거
+        # # 필요없는 선들 제거
+        # del_num = 0
+        # for i in range(len(self.voronoi.ridge_points)):
+        #     if -1 <= self.voronoi.ridge_points[i][0] - self.voronoi.ridge_points[i][1] <= 1:
+        #         self.voronoi.ridge_vertices.pop(i-del_num)
+        #         del_num += 1
+        #     elif self.voronoi.ridge_points[i][0] == -1 or self.voronoi.ridge_points[i][1] == -1:
+        #         self.voronoi.ridge_vertices.pop(i-del_num)
+        #         del_num += 1
+        
+        # self.voronoi.ridge_vertices.sort(key = lambda x: (x[0],x[1]))
+        
+        self.x = 50
+        self.y = 530        
+        self.global_path = global_path
+        self.obs = global_path
+        self.voronoi = Voronoi(self.global_path)
+        
         delnum = 0
-        for i in range(len(self.voronoi.ridge_points)):
+        for i in range(0,len(self.voronoi.ridge_points)):
             if -1 <= self.voronoi.ridge_points[i][0] - self.voronoi.ridge_points[i][1] <= 1:
                 self.voronoi.ridge_vertices.pop(i-delnum)
                 delnum += 1
+            elif self.voronoi.ridge_vertices[i-delnum][0] == -1 or self.voronoi.ridge_vertices[i-delnum][1] == -1:
+                self.voronoi.ridge_vertices.pop(i-delnum)
+                delnum += 1
                 
-        # self.global_path = global_path
-        # self.voronoi_lines = Voronoi(self.global_path)
+        self.voronoi.ridge_vertices.sort(key = lambda x: (x[0],x[1]))
         
-        # delnum = 0
-        # for i in range(0,len(self.voronoi_lines.ridge_points)):
-        #     if 1 >= self.voronoi_lines.ridge_points[i][0]-self.voronoi_lines.ridge_points[i][1] >= -1:
-        #         self.voronoi_lines.ridge_vertices.pop(i-delnum)
-        #         delnum += 1
-        
-        # plt.plot(self.global_path)
-        # plt.show()
+        plt.plot(self.global_path)
+        plt.show()
         
     def find_start(self):
         dis = [distance.euclidean([self.x,self.y],p) for p in self.voronoi.vertices]
@@ -39,21 +54,71 @@ class Voronoi_Diagram:
 
         return min_ind
     
+    def find_ridges(self, node_ind):
+        ridges = []
+        for ridge in self.voronoi.ridge_vertices:
+            if ridge[0] == node_ind:
+                ridges.append(ridge)
+        
+        return ridges
+    
+    def is_collision(self, cur_point):
+        dis = [distance.euclidean(self.voronoi.vertices[cur_point],p) for p in self.obs]
+        if dis < MACARON_TREAD:
+            return True
+        return False
+    
     def get_path(self):
+        self.voronoi.ridge_points.sort()
         start_point = self.find_start()
-        deq = deque([])
+        root_point = start_point
+        deq = deque([(root_point,start_point)])
+        candidate_nodes = {}
         while True:
-            pass
+            print(candidate_nodes)
+            if len(deq):
+                break
+            [root_point, cur_point] = deq.popleft()
+            if self.is_collision(cur_point):
+                candidate_nodes[root_point] = []
+                continue
+            ridges = self.find_ridges(cur_point)
+            
+            if len(ridges) == 1:
+                deq.append((root_point,ridges[0]))
+            elif len(ridges) > 1:
+                for r in ridges:
+                    deq.append((r,r))
+            if root_point in candidate_nodes:
+                candidate_nodes[root_point].append(cur_point)
+            else:
+                candidate_nodes[root_point] = [cur_point]
+                
+        selected_points = []
+        print(candidate_nodes)
+        for root in candidate_nodes.keys():
+            selected_points.extend(candidate_nodes[root])
+        
+        return selected_points
+            
+            
         
     def show(self):
-        fig = voronoi_plot_2d(self.voronoi_lines, show_vertices=True, line_colors='orange',
+        fig = voronoi_plot_2d(self.voronoi, show_vertices=True, line_colors='orange',
                       line_width=1, line_alpha=0.6, point_size=1)
         plt.show()
-    
-    
         
+    def selected_show(self):
+        selected_points = self.get_path()
+        px = []
+        py = []
+        for p in selected_points:
+            px.append(self.voronoi.vertices[p][0])
+            py.append(self.voronoi.vertices[p][1])
+        plt.plot(px, py, 'ro', self.global_path, 'bo', self.x,self.y,'ro')
+        plt.show()
 
-"""
+
 def main():
     point = np.array([(4, 478) ,
     (18, 469) ,
@@ -215,6 +280,7 @@ def main():
     (234, 351)])
     VD = Voronoi_Diagram(point)
     VD.show()
+    VD.selected_show()
     # pass
     # VD = Voronoi_Diagram(np.load(file = "bonseon.npy"))
     # VD = Voronoi_Diagram(np.load(file = "yaeseon_xy.npy"))
@@ -234,4 +300,3 @@ def main():
     
 if __name__ == '__main__':
     main()
-"""
