@@ -54,7 +54,6 @@ class Voronoi_Diagram:
     def find_start(self):
         dis = [distance.euclidean([self.x1,self.y],p) for p in self.voronoi.vertices]
         min_ind = dis.index(min(dis))
-        print(min_ind)
 
         return min_ind
     
@@ -68,7 +67,6 @@ class Voronoi_Diagram:
             elif ridge[1] == node_ind and not ridge[0] in self.checked_node.keys():
                 ridges.append(ridge[0])
                 self.checked_node[ridge[0]] = True
-        print(ridges)
         
         return ridges
     
@@ -81,22 +79,18 @@ class Voronoi_Diagram:
         start_point = self.find_start()
         root_point = start_point
         deq = deque([(root_point,start_point)])
-        print(deq)
         candidate_nodes = {}
         while True:
-            print(candidate_nodes)
             if len(deq) <= 0:
                 break
             [root_point, cur_point] = deq.popleft()
             collision = self.is_collision(cur_point)
-            print(root_point,cur_point)
             if collision:
                 candidate_nodes[root_point] = []
                 continue
             ridges = self.find_ridges(cur_point)
             
             if len(ridges) == 1:
-                print('len 1')
                 deq.append((root_point,ridges[0]))
             elif len(ridges) > 1:
                 for r in ridges:
@@ -107,35 +101,33 @@ class Voronoi_Diagram:
                 candidate_nodes[root_point] = [cur_point]
                 
         selected_points = []
-        print(candidate_nodes)
         for root in candidate_nodes.keys():
             selected_points.extend(candidate_nodes[root])
         
         return selected_points
             
+    def last_points(self):
+        selected_points = self.get_path()
+        points = []
+        for p in selected_points:
+            points.append(self.voronoi.vertices[p])
             
+        last_points = np.array(points)
+        return last_points
         
     def show(self):
         fig = voronoi_plot_2d(self.voronoi, show_vertices=True, line_colors='orange',
                       line_width=1, line_alpha=0.6, point_size=1)
         plt.show()
-        
+                
     def selected_show(self):
-        selected_points = self.get_path()
-        print(selected_points)
-        px = []
-        py = []
-        for p in selected_points:
-            px.append(self.voronoi.vertices[p][0])
-            py.append(self.voronoi.vertices[p][1])
-        print(px, py)
-        plt.plot(px, py, 'ro', self.obs[:,0],self.obs[:,1], 'bo')
+        points = self.last_points()
+        plt.plot(points[:,0],points[:,1], 'ro', self.obs[:,0],self.obs[:,1], 'bo')
         plt.show()
 
 
 def main():
     VD = Voronoi_Diagram(line_left = np.load(file = "wonline10203.npy"), line_right = np.load(file = "wonline20203.npy"))
-    VD.show()
     VD.selected_show()
 
     # randpoint = np.array(random.choices(range(1,5001),k=100))

@@ -6,6 +6,7 @@ import Voronoi
 MAX_theta = 20
 MIN_theta = -20
 thetaNum = 15 # 직선 경로도 선택할 수 있도록 홀수로 설정
+MACARON_TREAD = 1.5
 R = 0.5
 Gp = 1
 Hp = 1
@@ -26,25 +27,21 @@ class Node:
         self.fcost = 0
 
 class Astar:
-    def __init__(self, xi, yi, heading, obs_xy, global_path, xf, yf, margin):
+    def __init__(self, global_path, margin, center_line = None):
         self.global_path = global_path
+        self.center_line = center_line
+        self.cur_map = []
         
         self.open_list = []
         self.close_list = []
         
-        self.xy_start = [xi, yi]
-        self.xy_goal = [xf, yf]
-        self.heading = heading
-        
         self.curNode = Node(self.xy_start, self.heading)
         self.open_list.append(self.curNode)
         
-        self.Voronoi_Lines = self.VD()
-        
-        self.obs_xy = obs_xy
         self.margin = margin
         
     def calc_gcost(self, node):
+        
         if node.pnode:
             node.gcost = node.pnode.gcost-1
         else:
@@ -55,19 +52,17 @@ class Astar:
         node.hcost = distance.euclidean(node,self.xy_goal)
         return node.hcost
     
-    def calc_vcost(self, node):
+    def calc_vcost(self, node, v_point):
+        v_dis = [((node-p[0])**2+(node-p[1])**2)**0.5 for p in v_point]
+        node.vcost = min(v_dis)
         return node.vcost
     
     def calc_fcost(self, node):
         node.fcost = Gp * self.calc_gcost(node) + Hp * self.calc_hcost(node) + Vp * self.calc_vcost(node)
         return self.fcost
     
-    def VD(self):
-        pass
-    
     def GetNewNodes(self):
         for i in np.linspace(MAX_theta,MIN_theta,thetaNum):
-            
             dtheta = self.curNode.heading + i
             
             xd = self.curNode.x + R*sin(dtheta)
@@ -77,7 +72,8 @@ class Astar:
             self.curNode.cnode.append(Node(xd,yd,dtheta,self.curNode))
             
     def is_collision(self,node):
-        pass
+        dis = [((node-p[0])**2+(node-p[1])**2)**0.5 for p in self.obs]
+        return (np.array(dis) <= (MACARON_TREAD/2)).any()
     
     def Astar(self, xi, yi, heading, obs_xy, xf, yf):
         
@@ -93,7 +89,7 @@ class Astar:
         
         self.obs_xy = obs_xy
         
-        self.Voronoi_Lines = self.VD()
+        self.VD = Voronoi(xi, yi, heading, self.center_line, obs_xy)
         
         while self.open_list:
             
