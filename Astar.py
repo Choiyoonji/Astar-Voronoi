@@ -27,9 +27,10 @@ class Node:
         self.fcost = 0
 
 class Astar:
-    def __init__(self, global_path, margin, center_line = None):
+    def __init__(self, global_path, margin, left_line = None, right_line = None):
         self.global_path = global_path
-        self.center_line = center_line
+        self.left_line = left_line
+        self.right_line = right_line
         self.cur_map = []
         
         self.open_list = []
