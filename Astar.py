@@ -7,7 +7,7 @@ MAX_theta = 20
 MIN_theta = -20
 thetaNum = 15 # 직선 경로도 선택할 수 있도록 홀수로 설정
 MACARON_TREAD = 1.5
-R = 0.5
+R = 0.3
 Gp = 1
 Hp = 1
 Vp = 1
@@ -31,7 +31,10 @@ class Astar:
         self.global_path = global_path
         self.left_line = left_line
         self.right_line = right_line
-        self.cur_map = []
+
+        self.cur_global_path = self.global_path[0:]
+        self.cur_left_line = self.left_line[0:]
+        self.cur_right_line = self.right_line[0:]
         
         self.open_list = []
         self.close_list = []
@@ -40,6 +43,11 @@ class Astar:
         self.open_list.append(self.curNode)
         
         self.margin = margin
+
+    def cur_map_update(self, cur_map_ind, fin_map_ind):
+        self.cur_global_path = self.global_path[cur_map_ind:fin_map_ind]
+        self.cur_left_line = self.left_line[cur_map_ind:fin_map_ind]
+        self.cur_right_line = self.right_line[cur_map_ind:fin_map_ind]
         
     def calc_gcost(self, node):
         
@@ -72,12 +80,15 @@ class Astar:
             self.open_list.append(Node(xd,yd,dtheta,self.curNode))
             self.curNode.cnode.append(Node(xd,yd,dtheta,self.curNode))
             
-    def is_collision(self,node):
-        dis = [((node-p[0])**2+(node-p[1])**2)**0.5 for p in self.obs]
+    def is_collision(self, node, obs_xy):
+        dis = [((node-p[0])**2+(node-p[1])**2)**0.5 for p in obs_xy]
         return (np.array(dis) <= (MACARON_TREAD/2)).any()
     
-    def Astar(self, xi, yi, heading, obs_xy, xf, yf):
+    def Astar(self, xi, yi, heading, obs_xy, xf, yf, cur_map_ind, fin_map_ind):
         
+        self.cur_map_update(cur_map_ind, fin_map_ind)
+        self.VD = Voronoi(xi, yi, self.cur_left_line, self.cur_right_line, obs_xy)
+
         self.open_list = []
         self.close_list = []
         
@@ -87,10 +98,6 @@ class Astar:
         
         self.curNode = Node(self.xy_start, self.heading)
         self.open_list.append(self.curNode)
-        
-        self.obs_xy = obs_xy
-        
-        self.VD = Voronoi(xi, yi, heading, self.center_line, obs_xy)
         
         while self.open_list:
             
@@ -106,7 +113,7 @@ class Astar:
             self.GetNewNodes()
             
             for n_node in self.open_list:
-                collision = self.is_collision(n_node)
+                collision = self.is_collision(n_node, obs_xy)
                 if collision:
                     self.open_list.remove(n_node)
                     continue
