@@ -5,15 +5,16 @@ from collections import deque
 # import random
 import time
 
-MACARON_TREAD = 1.5
+MACARON_TREAD = 5
 
 class Voronoi_Diagram:
-    def __init__(self, global_path = None, line_left = None, line_right = None, obs_xy = None):
-        self.x1 = 955802.4345550193
-        self.y = 1951238.3999692136
+    def __init__(self, xi, yi, line_left = None, line_right = None, obs_xy = None):
+        self.x1 = xi
+        self.y = yi
         self.obs = []
         self.obs.extend(line_left)
         self.obs.extend(line_right)
+        self.obs.extend(obs_xy)
         self.obs = np.array(self.obs)
         self.voronoi = Voronoi(self.obs)
         self.checked_node = {}
@@ -28,8 +29,6 @@ class Voronoi_Diagram:
             elif self.voronoi.ridge_vertices[i-del_num][0] == -1 or self.voronoi.ridge_points[i-del_num][1] == -1:
                 self.voronoi.ridge_vertices.pop(i-del_num)
                 del_num += 1
-        
-        print(self.voronoi.ridge_vertices)
         
         # self.voronoi.ridge_vertices.sort(key = lambda x: (x[0],x[1]))
         
@@ -61,7 +60,7 @@ class Voronoi_Diagram:
         self.checked_node[node_ind] = True
         ridges = []
         for ridge in self.voronoi.ridge_vertices:
-            if ridge[0] == node_ind:
+            if ridge[0] == node_ind and not ridge[1] in self.checked_node.keys():
                 ridges.append(ridge[1])
                 self.checked_node[ridge[1]] = True
             elif ridge[1] == node_ind and not ridge[0] in self.checked_node.keys():
@@ -86,7 +85,12 @@ class Voronoi_Diagram:
             [root_point, cur_point] = deq.popleft()
             collision = self.is_collision(cur_point)
             if collision:
-                candidate_nodes[root_point] = []
+                if root_point in candidate_nodes:
+                    collision_points = candidate_nodes[root_point]
+                    candidate_nodes[root_point] = []
+                for p in collision_points:
+                    if p in candidate_nodes:
+                        candidate_nodes[p] = []
                 continue
             ridges = self.find_ridges(cur_point)
             
@@ -113,6 +117,9 @@ class Voronoi_Diagram:
             points.append(self.voronoi.vertices[p])
             
         last_points = np.array(points)
+        
+        points = last_points
+        plt.plot(points[:,0],points[:,1], 'ro', self.obs[:,0],self.obs[:,1], 'bo')
         return last_points
         
     def show(self):
@@ -127,7 +134,11 @@ class Voronoi_Diagram:
 
 
 def main():
-    VD = Voronoi_Diagram(line_left = np.load(file = "wonline10203.npy"), line_right = np.load(file = "wonline20203.npy"))
+    line_left = [[15,i] for i in range(40)]
+    line_right = [[25,i] for i in range(40)]
+    obs_xy = [[16,10],[17,10],[18,10],[19,10],[20,30],[16,30],[17,30],[18,30],[19,30],[20,30],[24,20],[23,20],[22,20],[21,20],[20,20]]
+    VD = Voronoi_Diagram(xi = 10, yi = 0, line_left=line_left, line_right=line_right, obs_xy=obs_xy)
+    # VD = Voronoi_Diagram(line_left = np.load(file = "wonline10203.npy"), line_right = np.load(file = "wonline20203.npy"))
     VD.selected_show()
 
     # randpoint = np.array(random.choices(range(1,5001),k=100))
