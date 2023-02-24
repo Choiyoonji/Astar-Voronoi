@@ -3,16 +3,18 @@ import numpy as np
 from scipy.spatial import distance
 from Voronoi import Voronoi_Diagram
 import matplotlib.pyplot as plt
+import time
+
 
 MAX_theta = np.deg2rad(28)
 MIN_theta = -np.deg2rad(28)
-thetaNum = 29 # 직선 경로도 선택할 수 있도록 홀수로 설정
-MACARON_TREAD = 3
-R = 1
-Gp = 2
-Hp = 5
-Vp = 10
-Op = -2
+thetaNum = 9 # 직선 경로도 선택할 수 있도록 홀수로 설정
+MACARON_TREAD = 2
+R = 0.9
+Gp = 5
+Hp = 25
+Vp = 25
+Op = 20
 
 class Node:
     def __init__(self, xy, heading, pnode = None):
@@ -62,8 +64,8 @@ class Astar:
     def calc_vcost(self, node):
         v_dis = [((node.x-p[0])**2+(node.y-p[1])**2)**0.5 for p in self.VD]
         min_ind = v_dis.index(min(v_dis))
-        minadd = min_ind + 4
-        minmin = min_ind - 2
+        minadd = min_ind + 6
+        minmin = min_ind - 0
         if minadd >= len(v_dis):
             minadd = len(v_dis) - 1
         if minmin < 0:
@@ -99,7 +101,10 @@ class Astar:
     def generate_path(self, xi, yi, heading, obs_xy, xf, yf, cur_map_ind, fin_map_ind):
         
         self.cur_map_update(cur_map_ind, fin_map_ind)
-        self.obs = obs_xy + self.cur_left_line + self.cur_right_line
+        self.obs = []
+        self.line = self.cur_left_line + self.cur_right_line
+        self.obs.extend(obs_xy)
+        self.obs.extend(self.line)
         self.Voronoi = Voronoi_Diagram(xi, yi, line_left = self.cur_left_line, line_right = self.cur_right_line, obs_xy =obs_xy)
         self.VD = self.Voronoi.last_points()
 
@@ -115,11 +120,9 @@ class Astar:
         
         while self.open_list:
             
-            self.open_list.sort(key = lambda x: x.fcost)
-
-            self.curNode = self.open_list[0]
-            self.close_list.append(self.open_list[0])
-            self.open_list.pop(0)
+            self.curNode = min(self.open_list, key=lambda n: n.fcost)
+            self.close_list.append(self.curNode)
+            self.open_list.remove(self.curNode)
             
             if distance.euclidean([self.curNode.x,self.curNode.y],self.xy_goal) < self.margin:
                 break
@@ -139,33 +142,41 @@ class Astar:
         
         while True:
             path.append([self.curNode.x,self.curNode.y])
-            print(self.curNode.fcost)
+            # print(self.curNode.fcost)
             if self.curNode.x == self.xy_start[0] and self.curNode.y == self.xy_start[1]:
                 break
             
             self.curNode = self.curNode.pnode
-        print(path)
+        # print(path)
             
         return path
 
 def main():
-    global_path = [[20,i] for i in range(70)]
-    margin = 3
-    line_left = [[15,i] for i in range(70)]
-    line_right = [[25,i] for i in range(70)]
-    obs_xy = [[16,20],[17,20],[18,20],[19,20],[20,20],[20,50],[21,50],[24,50],[23,50],[22,50]]
-    astar = Astar(global_path, margin, left_line = line_left, right_line = line_right)
-    selected_path = astar.generate_path(xi=20, yi=0, heading=pi/2, obs_xy=obs_xy, xf=20, yf=70, cur_map_ind=0, fin_map_ind=70)
+    global_path = [[20,i] for i in range(40)]
+    margin = 2
+    line_left = [[15,i] for i in range(40)]
+    line_right = [[25,i] for i in range(40)]
+    # obs_xy = []
+    obs_xy = [[16,20],[17,20],[18,20],[19,20]]
+    # obs_xy = [[16,10],[17,10],[18,10],[19,10],[24,30],[23,30],[22,30],[21,30],[20,30]]
+    # line_left = [[15,i] for i in range(70)]
+    # line_right = [[25,i] for i in range(70)]
+    # obs_xy = [[16,20],[17,20],[18,20],[19,20],[20,20],[20,50],[21,50],[24,50],[23,50],[22,50]]
     
+    astar = Astar(global_path, margin, left_line = line_left, right_line = line_right)
+    t = time.time()
+    selected_path = astar.generate_path(xi=20, yi=0, heading=pi/2, obs_xy=obs_xy, xf=20, yf=40, cur_map_ind=0, fin_map_ind=40)
+    print(time.time()-t)
+
     obs = []
     obs.extend(line_left)
     obs.extend(line_right)
     obs.extend(obs_xy)
     obs = np.array(obs)
-    plt.axis([-10, 60, 0, 70])
+    plt.axis([0, 40, 0, 40])
     plt.plot(obs[:,0],obs[:,1], 'bo')
     selected_path = np.array(selected_path)
-    plt.plot(selected_path[:,0],selected_path[:,1])
+    plt.plot(selected_path[:,0],selected_path[:,1],'go')
     plt.show()
     
 if __name__ == '__main__':

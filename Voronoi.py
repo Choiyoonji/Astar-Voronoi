@@ -19,6 +19,8 @@ class Voronoi_Diagram:
         self.voronoi = Voronoi(self.obs)
         self.checked_node = {}
         
+        # voronoi_plot_2d(self.voronoi)
+        # plt.show()
         
         # 필요없는 선들 제거
         del_num = 0
@@ -136,7 +138,7 @@ class Voronoi_Diagram:
 def main():
     line_left = [[15,i] for i in range(40)]
     line_right = [[25,i] for i in range(40)]
-    obs_xy = [[16,10],[17,10],[18,10],[19,10],[20,30],[16,30],[17,30],[18,30],[19,30],[20,30],[24,20],[23,20],[22,20],[21,20],[20,20]]
+    obs_xy = [[16,10],[17,10],[18,10],[19,10],[24,30],[23,30],[22,30],[21,30],[20,30]]
     VD = Voronoi_Diagram(xi = 10, yi = 0, line_left=line_left, line_right=line_right, obs_xy=obs_xy)
     # VD = Voronoi_Diagram(line_left = np.load(file = "wonline10203.npy"), line_right = np.load(file = "wonline20203.npy"))
     VD.selected_show()
