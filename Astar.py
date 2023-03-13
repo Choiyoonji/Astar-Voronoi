@@ -9,8 +9,14 @@ import time
 MAX_theta = np.deg2rad(28)
 MIN_theta = -np.deg2rad(28)
 thetaNum = 5 # 직선 경로도 선택할 수 있도록 홀수로 설정
+<<<<<<< HEAD
 MACARON_TREAD = 1.5
 R = 0.3
+=======
+MACARON_TREAD = 2
+
+R = 2.0
+>>>>>>> 54902ca9a70b7d2091d3a1b171afc3efb1c296de
 Gp = R
 Hp = 1
 Vp = 1
@@ -132,7 +138,7 @@ class Astar:
             for n_node in self.open_list:
                 self.calc_fcost(n_node)
             
-            print(len(self.open_list),self.curNode.x,self.curNode.y)
+            # print(len(self.open_list),self.curNode.x,self.curNode.y)
                 
         return self.extracted_path()
 
@@ -166,7 +172,7 @@ def main():
     astar = Astar(global_path, margin, left_line = line_left, right_line = line_right)
     t = time.time()
     selected_path = astar.generate_path(xi=20, yi=0, heading=pi/2, obs_xy=obs_xy, xf=20, yf=40, cur_map_ind=0, fin_map_ind=40)
-    print(time.time()-t)
+    
 
     obs = []
     obs.extend(line_left)
@@ -177,6 +183,7 @@ def main():
     plt.plot(obs[:,0],obs[:,1], 'xk')
     selected_path = np.array(selected_path)
     plt.plot(selected_path[:,0],selected_path[:,1],'go')
+    print(time.time()-t)
     plt.show()
     
 if __name__ == '__main__':
