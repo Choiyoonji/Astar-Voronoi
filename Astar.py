@@ -8,13 +8,13 @@ import time
 
 MAX_theta = np.deg2rad(28)
 MIN_theta = -np.deg2rad(28)
-thetaNum = 9 # 직선 경로도 선택할 수 있도록 홀수로 설정
-MACARON_TREAD = 2
-R = 0.9
-Gp = 5
-Hp = 25
-Vp = 25
-Op = 20
+thetaNum = 5 # 직선 경로도 선택할 수 있도록 홀수로 설정
+MACARON_TREAD = 1.5
+R = 0.3
+Gp = R
+Hp = 1
+Vp = 1
+Op = 2
 
 class Node:
     def __init__(self, xy, heading, pnode = None):
@@ -154,11 +154,11 @@ class Astar:
 def main():
     global_path = [[20,i] for i in range(40)]
     margin = 2
-    line_left = [[15,i] for i in range(40)]
-    line_right = [[25,i] for i in range(40)]
+    line_left = [[18,i] for i in range(40)]
+    line_right = [[22,i] for i in range(40)]
     # obs_xy = []
-    obs_xy = [[16,20],[17,20],[18,20],[19,20]]
-    # obs_xy = [[16,10],[17,10],[18,10],[19,10],[24,30],[23,30],[22,30],[21,30],[20,30]]
+    # obs_xy = [[16,20],[17,20],[18,20],[19,20]]
+    obs_xy = [[16,10],[17,10],[18,10],[19,10],[20,30],[16,30],[17,30],[18,30],[19,30],[20,30],[21,20],[20,20]]
     # line_left = [[15,i] for i in range(70)]
     # line_right = [[25,i] for i in range(70)]
     # obs_xy = [[16,20],[17,20],[18,20],[19,20],[20,20],[20,50],[21,50],[24,50],[23,50],[22,50]]
@@ -173,8 +173,8 @@ def main():
     obs.extend(line_right)
     obs.extend(obs_xy)
     obs = np.array(obs)
-    plt.axis([0, 40, 0, 40])
-    plt.plot(obs[:,0],obs[:,1], 'bo')
+    plt.axis([10, 30, 10, 30])
+    plt.plot(obs[:,0],obs[:,1], 'xk')
     selected_path = np.array(selected_path)
     plt.plot(selected_path[:,0],selected_path[:,1],'go')
     plt.show()
