@@ -3,23 +3,18 @@ import numpy as np
 from scipy.spatial import distance
 from Voronoi import Voronoi_Diagram
 import matplotlib.pyplot as plt
+from matplotlib.patches import Circle
 import time
 
 
 MAX_theta = np.deg2rad(28)
 MIN_theta = -np.deg2rad(28)
 thetaNum = 5 # 직선 경로도 선택할 수 있도록 홀수로 설정
-<<<<<<< HEAD
 MACARON_TREAD = 1.5
-R = 0.3
-=======
-MACARON_TREAD = 2
-
-R = 2.0
->>>>>>> 54902ca9a70b7d2091d3a1b171afc3efb1c296de
+R = 0.1
 Gp = R
 Hp = 1
-Vp = 1
+Vp = 2
 Op = 2
 
 class Node:
@@ -114,6 +109,10 @@ class Astar:
         self.Voronoi = Voronoi_Diagram(xi, yi, line_left = self.cur_left_line, line_right = self.cur_right_line, obs_xy =obs_xy)
         self.VD = self.Voronoi.last_points()
 
+
+        self.VD = np.array(self.VD)
+        
+
         self.open_list = []
         self.close_list = []
         
@@ -138,9 +137,9 @@ class Astar:
             for n_node in self.open_list:
                 self.calc_fcost(n_node)
             
-            # print(len(self.open_list),self.curNode.x,self.curNode.y)
+            print(len(self.open_list),self.curNode.x,self.curNode.y)
                 
-        return self.extracted_path()
+        return self.extracted_path(), self.VD
 
     def extracted_path(self):
         path = [[self.curNode.x,self.curNode.y]]
@@ -158,31 +157,42 @@ class Astar:
         return path
 
 def main():
+    fig = plt.figure(figsize=(7, 7))
+    subplot = fig.add_subplot(111)
     global_path = [[20,i] for i in range(40)]
-    margin = 2
+    margin = 0.5
     line_left = [[18,i] for i in range(40)]
     line_right = [[22,i] for i in range(40)]
     # obs_xy = []
     # obs_xy = [[16,20],[17,20],[18,20],[19,20]]
-    obs_xy = [[16,10],[17,10],[18,10],[19,10],[20,30],[16,30],[17,30],[18,30],[19,30],[20,30],[21,20],[20,20]]
+    obs_xy = [[18.5,10],[19,10],[19.5,10],[21.1,30],[21.2,30],[21.3,30],[21.4,30],[21.5,30],[20.9,30],[20.8,30],[20.7,30],[20.6,30],[20.5,30]]
     # line_left = [[15,i] for i in range(70)]
     # line_right = [[25,i] for i in range(70)]
     # obs_xy = [[16,20],[17,20],[18,20],[19,20],[20,20],[20,50],[21,50],[24,50],[23,50],[22,50]]
     
     astar = Astar(global_path, margin, left_line = line_left, right_line = line_right)
     t = time.time()
-    selected_path = astar.generate_path(xi=20, yi=0, heading=pi/2, obs_xy=obs_xy, xf=20, yf=40, cur_map_ind=0, fin_map_ind=40)
+    selected_path, vd = astar.generate_path(xi=20, yi=25, heading=pi/2, obs_xy=obs_xy, xf=20, yf=35, cur_map_ind=0, fin_map_ind=40)
     
+    subplot.set_xlabel('X-distance: m')
+    subplot.set_ylabel('Y-distance: m')
 
     obs = []
     obs.extend(line_left)
     obs.extend(line_right)
     obs.extend(obs_xy)
     obs = np.array(obs)
-    plt.axis([10, 30, 10, 30])
-    plt.plot(obs[:,0],obs[:,1], 'xk')
+    plt.axis([10, 30, 20, 40])
+
+    for OB in obs:
+        circle = Circle(xy=(OB[0],OB[1]), radius=0.7,alpha = 0.2)
+        subplot.add_patch(circle)
+        subplot.plot(OB[0],OB[1], 'xk')
+    
+    # subplot.plot(vd[:,0],vd[:,1],'ro')
+    subplot.plot(obs[:,0],obs[:,1], 'xk')
     selected_path = np.array(selected_path)
-    plt.plot(selected_path[:,0],selected_path[:,1],'go')
+    subplot.plot(selected_path[:,0],selected_path[:,1], 'ro')
     print(time.time()-t)
     plt.show()
     

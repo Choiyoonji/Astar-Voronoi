@@ -5,22 +5,20 @@ from collections import deque
 # import random
 import time
 
-MACARON_TREAD = 5
+MACARON_TREAD = 1.5
 
 class Voronoi_Diagram:
     def __init__(self, xi, yi, line_left = None, line_right = None, obs_xy = None):
         self.x1 = xi
         self.y = yi
         self.obs = []
+        obs_xy.sort(key = lambda x: (x[0]+x[1]))
         self.obs.extend(line_left)
         self.obs.extend(line_right)
         self.obs.extend(obs_xy)
         self.obs = np.array(self.obs)
         self.voronoi = Voronoi(self.obs)
         self.checked_node = {}
-        
-        # voronoi_plot_2d(self.voronoi)
-        # plt.show()
         
         # 필요없는 선들 제거
         del_num = 0
@@ -31,7 +29,8 @@ class Voronoi_Diagram:
             elif self.voronoi.ridge_vertices[i-del_num][0] == -1 or self.voronoi.ridge_points[i-del_num][1] == -1:
                 self.voronoi.ridge_vertices.pop(i-del_num)
                 del_num += 1
-        
+        # voronoi_plot_2d(self.voronoi)
+        # plt.show()
         # self.voronoi.ridge_vertices.sort(key = lambda x: (x[0],x[1]))
         
         # self.x = 50
@@ -125,14 +124,15 @@ class Voronoi_Diagram:
         return last_points
         
     def show(self):
-        fig = voronoi_plot_2d(self.voronoi, show_vertices=True, line_colors='orange',
-                      line_width=1, line_alpha=0.6, point_size=1)
-        plt.show()
+        pass
+        # fig = voronoi_plot_2d(self.voronoi, show_vertices=True, line_colors='orange',
+                    #   line_width=1, line_alpha=0.6, point_size=1)
+        # plt.show()   v 
                 
     def selected_show(self):
         points = self.last_points()
-        plt.plot(points[:,0],points[:,1], 'ro', self.obs[:,0],self.obs[:,1], 'bo')
-        plt.show()
+        # plt.plot(points[:,0],points[:,1], 'ro', self.obs[:,0],self.obs[:,1], 'bo')
+        # plt.show()
 
 
 def main():
